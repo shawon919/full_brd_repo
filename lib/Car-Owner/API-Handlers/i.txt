@@ -1,0 +1,149 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+const String baseURL = "https://nonideologically-minuscular-hoyt.ngrok-free.dev";
+
+class Apihandlers {
+  static Future<Map<String, String>> getUserInfo(String emailOrPhone) async {
+
+    final uri = Uri.parse(
+      "$baseURL/myapp/myapp/getuserinfo/$emailOrPhone/"
+    );
+
+    try {
+      final response = await http.get(
+        uri,
+        headers: {"Content-Type": "application/json"},
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        final user = data["message"];
+
+        return {
+          "username": user["fullname"],
+          "email": user["email"],
+        };
+      } else {
+        throw Exception(data["message"] ?? "User not found");
+      }
+
+    } catch (e) {
+      throw Exception("Server connection failed: $e");
+    }
+  }
+}
+
+
+
+getX
+
+import 'package:brd/Car-Owner/API-Handlers/API-Handlers.dart';
+import 'package:brd/Car-Owner/templets/UserSignIn.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+class Usergetxcontroller extends GetxController {
+
+  /// Password visibility
+  RxBool isHidden = true.obs;
+
+  /// Loading state
+  RxBool isLoading = false.obs;
+
+  /// Error message
+  RxString error = ''.obs;
+
+  void changestateHidden() {
+    isHidden.value = !isHidden.value;
+  }
+
+  /// OTP Controllers
+  final List<TextEditingController> otpControllers =
+      List.generate(6, (_) => TextEditingController());
+
+  /// OTP Focus Nodes
+  final List<FocusNode> focusNodes =
+      List.generate(6, (_) => FocusNode());
+
+  /// Handle OTP typing
+  void onchangeOtp(String value, int index) {
+
+    if (value.isNotEmpty && index < 5) {
+      focusNodes[index + 1].requestFocus();
+    }
+
+    if (value.isEmpty && index > 0) {
+      focusNodes[index - 1].requestFocus();
+    }
+  }
+
+  /// User info controller (email / phone)
+  final TextEditingController userinfoController = TextEditingController();
+
+  /// Validate user input
+  void changeInfoPromt(String value) {
+
+    if (value.isEmpty) {
+      error.value = "Please fill up the field";
+    } else {
+      error.value = "";
+    }
+  }
+
+  /// Submit form
+  Future<void> submitform(String userinfo) async {
+
+    if (userinfo.trim().isEmpty) {
+      error.value = "Please enter phone or email";
+      return;
+    }
+
+    try {
+
+      isLoading.value = true;
+
+      /// Call API
+      final user = await Apihandlers.getUserInfo(userinfo);
+
+      isLoading.value = false;
+
+      /// Navigate to next page with user data
+      Get.to(
+        UserSignin(),
+        arguments: user,
+      );
+
+    } catch (e) {
+
+      isLoading.value = false;
+
+      error.value = e.toString();
+
+      Get.snackbar(
+        "Error",
+        error.value,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  /// Dispose controllers to prevent memory leaks
+  @override
+  void onClose() {
+
+    userinfoController.dispose();
+
+    for (var controller in otpControllers) {
+      controller.dispose();
+    }
+
+    for (var node in focusNodes) {
+      node.dispose();
+    }
+
+    super.onClose();
+  }
+}

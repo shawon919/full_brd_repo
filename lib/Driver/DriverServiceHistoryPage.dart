@@ -1,0 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:brd/hire_service/api/hire_service_api.dart';
+import 'package:brd/hire_service/models/driver_service_model.dart';
+
+class DriverServiceHistoryPage extends StatefulWidget{const DriverServiceHistoryPage({super.key});@override State<DriverServiceHistoryPage>createState()=>_DriverServiceHistoryPageState();}
+class _DriverServiceHistoryPageState extends State<DriverServiceHistoryPage>{final api=HireServiceApi();List<DriverServiceModel>items=[];bool loading=true;@override void initState(){super.initState();load();}Future<void>load()async{try{items=await api.getMyDriverServiceHistory();}finally{if(mounted)setState(()=>loading=false);}}@override Widget build(BuildContext c)=>Scaffold(appBar:AppBar(title:const Text('Service History')),body:loading?const Center(child:CircularProgressIndicator()):ListView.builder(padding:const EdgeInsets.all(16),itemCount:items.length,itemBuilder:(_,i){final x=items[i];return Card(child:ListTile(title:Text(x.ownerName,style:const TextStyle(fontWeight:FontWeight.w800)),subtitle:Text('Salary: ৳${x.salary.toStringAsFixed(2)}\n${x.joiningDate} → ${x.endingDate.isEmpty?'Active':x.endingDate}\nStatus: ${x.status.toUpperCase()}'),isThreeLine:true));}));}

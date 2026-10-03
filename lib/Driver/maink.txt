@@ -1,0 +1,142 @@
+import 'package:brd/Driver/Drivergetxcontroller.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+
+class Driverregistration extends StatelessWidget {
+  Driverregistration({super.key});
+
+  final Drivergetxcontroller controller = Get.put(Drivergetxcontroller());
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Driver Registration")),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+
+            // ================= TEXT FIELDS =================
+            buildTextField(controller.fullNameController, "Full Name"),
+            buildTextField(controller.emailController, "Email"),
+            buildTextField(controller.phoneController, "Phone"),
+            buildTextField(controller.descriptionController, "Description"),
+            buildTextField(controller.passwordController, "Password",
+                isPassword: true),
+
+            
+
+            // ================= FILE PICKERS =================
+            buildFilePicker("DL Front", controller.dlFrontFile),
+            buildFilePicker("DL Back", controller.dlBackFile),
+            buildFilePicker("NID Front", controller.nidFrontFile),
+            buildFilePicker("NID Back", controller.nidBackFile),
+            buildFilePicker("CV", controller.cvFile),
+
+            
+
+            // ================= SUBMIT BUTTON =================
+            Obx(() => SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : () {
+                            // simple validation
+                            if (controller.fullNameController.text.isEmpty ||
+                                controller.emailController.text.isEmpty ||
+                                controller.phoneController.text.isEmpty ||
+                                controller.passwordController.text.isEmpty) {
+                              Get.snackbar("Error", "Fill all fields");
+                              return;
+                            }
+
+                            if (controller.dlFrontFile.value == null ||
+                                controller.dlBackFile.value == null ||
+                                controller.nidFrontFile.value == null ||
+                                controller.nidBackFile.value == null ||
+                                controller.cvFile.value == null) {
+                              Get.snackbar(
+                                  "Error", "Upload all required files");
+                              return;
+                            }
+
+                            controller.driverRegisterFunction();
+                          },
+                          child: controller.isLoading.value
+                              ? const SizedBox(//
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text("Register"),
+                  ),
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+Widget buildTextField(TextEditingController controller, String label,
+    {bool isPassword = false}) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: TextField(
+      controller: controller,
+      obscureText: isPassword,
+      decoration: InputDecoration(
+        labelText: label,
+        border: UnderlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    ),
+  );
+}
+
+
+
+
+Widget buildFilePicker(String title, Rx<File?> fileRx) {
+  return Obx(() => Container(
+        margin:  EdgeInsets.only(bottom: 12),
+        padding: EdgeInsets.all(10),
+        height: MediaQuery.of(Get.context!).size.height * 0.2,
+        width:  MediaQuery.of(Get.context!).size.height * 0.2,
+
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.red),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Text(
+                fileRx.value == null
+                    ? "Select $title"
+                    : fileRx.value!.path.split('/').last,
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final picked =
+                    await ImagePicker().pickImage(source: ImageSource.gallery);
+                if (picked != null) {
+                  fileRx.value = File(picked.path);
+                }
+              },
+              child: const Text("Pick"),
+            ),
+          ],
+        ),
+      ));
+}
