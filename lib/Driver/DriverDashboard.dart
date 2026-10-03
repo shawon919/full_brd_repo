@@ -667,8 +667,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
                   ],
                 ),
               ),
-              const Spacer(),
-              const Text(
+                const Text(
                 "#BRD-2048",
                 style: TextStyle(
                   color: Colors.white38,
@@ -1565,7 +1564,9 @@ class _DriverDashboardState extends State<DriverDashboard> {
       width: MediaQuery.of(context).size.width * .82,
       backgroundColor: background,
       child: SafeArea(
-        child: Column(
+        child: ListView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.zero,
           children: [
             Container(
               width: double.infinity,
@@ -1658,7 +1659,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
 
             _drawerItem(Icons.settings_outlined, "Settings", null),
 
-            const Spacer(),
+
 
             Padding(
               padding: const EdgeInsets.fromLTRB(15, 10, 15, 18),
